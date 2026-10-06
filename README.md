@@ -18,7 +18,7 @@ Vá em **[Releases](https://github.com/vipszsz/unfollow-control/releases/latest)
 | Sistema | Arquivo | Como abrir |
 |---|---|---|
 | **Windows** | `UnfollowControl-x.y.z-portable.exe` | Um arquivo só, sem instalação. Dê dois cliques. |
-| **Mac, Linux, outros** | `Unfollow Control.html` | Abra no Chrome, Edge ou Firefox. Não tem o painel do Instagram: os perfis abrem numa aba nova. |
+| **Mac, Linux, outros** | `UnfollowControl-x.y.z.html` | Abra no Chrome, Edge ou Firefox. Não tem o painel do Instagram: os perfis abrem numa aba nova. |
 
 **Aviso do Windows na primeira vez.** O app não tem assinatura digital (ela é paga), então o Windows mostra *"O Windows protegeu o computador"*. Clique em **Mais informações → Executar assim mesmo**. O código está todo aqui no repositório para quem quiser conferir.
 
@@ -59,6 +59,6 @@ Feito com Vite, React, TypeScript, Motion e Electron. As animações seguem a sk
 
 **Unfollow Control** shows who doesn't follow you back on Instagram, using Instagram's own data export. No password, no bot, no server: everything runs on your computer.
 
-- **Download** from [Releases](https://github.com/vipszsz/unfollow-control/releases/latest): the portable `.exe` for Windows, or `Unfollow Control.html` for any other system (no Instagram panel there; profiles open in a new tab). Windows will warn that the app is unsigned. Click *More info → Run anyway*.
+- **Download** from [Releases](https://github.com/vipszsz/unfollow-control/releases/latest): the portable `.exe` for Windows, or `UnfollowControl-x.y.z.html` for any other system (no Instagram panel there; profiles open in a new tab). Windows will warn that the app is unsigned. Click *More info → Run anyway*.
 - **Use:** export *Followers and following* from Instagram's Accounts Center as **JSON**, *All time*, and drop the `.zip` into the app. Then use the lists, swipe mode, labels, unfollow queue, history and account lookup. The app is in Portuguese and English.
 - **Privacy:** the app itself can't reach the network. The optional Instagram panel is a separate, sandboxed session limited to Instagram/Meta domains. You log in on Instagram's own page and unfollow yourself; the app never reads or clicks anything there.
