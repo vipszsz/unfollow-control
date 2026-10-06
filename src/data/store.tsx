@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { analyze, newest, type Lists } from './analyze'
-import { db } from './db'
+import { db, type Mark } from './db'
 import { ImportError, parseExport, type Snapshot } from './parse'
 
 type Status = 'loading' | 'empty' | 'ready'
@@ -14,6 +14,9 @@ interface Data {
   error?: ImportError
   /** True right after a successful import, until the next one starts. */
   justImported: boolean
+  /** Marks for the current owner, keyed by username. */
+  marks: Map<string, Mark>
+  toggleReviewed(username: string): void
   importFile(file: File): Promise<void>
   clearError(): void
   wipe(): Promise<void>
@@ -26,9 +29,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [importing, setImporting] = useState(false)
   const [error, setError] = useState<ImportError>()
   const [justImported, setJustImported] = useState(false)
+  const [allMarks, setAllMarks] = useState<Map<string, Mark>>(new Map())
 
   useEffect(() => {
     db.all().then(setSnapshots, () => setSnapshots([]))
+    db.marks().then((list) => setAllMarks(new Map(list.map((m) => [m.key, m]))), () => {})
   }, [])
 
   const importFile = useCallback(async (file: File) => {
@@ -50,11 +55,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const wipe = useCallback(async () => {
     await db.clear()
     setSnapshots([])
+    setAllMarks(new Map())
     setJustImported(false)
   }, [])
 
+  const current = snapshots ? newest(snapshots) : undefined
+  const owner = current?.owner ?? ''
+
+  const marks = useMemo(() => {
+    const prefix = `${owner}|`
+    const out = new Map<string, Mark>()
+    for (const [k, m] of allMarks) if (k.startsWith(prefix)) out.set(k.slice(prefix.length), m)
+    return out
+  }, [allMarks, owner])
+
+  const toggleReviewed = useCallback(
+    (u: string) => {
+      const key = `${owner}|${u}`
+      setAllMarks((prev) => {
+        const next = new Map(prev)
+        const m: Mark = { ...prev.get(key), key, reviewed: !prev.get(key)?.reviewed }
+        if (m.reviewed) {
+          next.set(key, m)
+          db.putMark(m)
+        } else {
+          next.delete(key)
+          db.deleteMark(key)
+        }
+        return next
+      })
+    },
+    [owner],
+  )
+
   const value = useMemo<Data>(() => {
-    const current = snapshots ? newest(snapshots) : undefined
     return {
       status: snapshots === null ? 'loading' : current ? 'ready' : 'empty',
       snapshots: snapshots ?? [],
@@ -63,11 +97,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       importing,
       error,
       justImported,
+      marks,
+      toggleReviewed,
       importFile,
       clearError: () => setError(undefined),
       wipe,
     }
-  }, [snapshots, importing, error, justImported, importFile, wipe])
+  }, [snapshots, current, importing, error, justImported, marks, toggleReviewed, importFile, wipe])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

@@ -1,8 +1,9 @@
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DropOverlay } from './components/DropOverlay'
 import { ExportGuide } from './components/ExportGuide'
 import { Header } from './components/Header'
+import { ListView } from './components/ListView'
 import { Overview } from './components/Overview'
 import { TitleBar } from './components/TitleBar'
 import { Welcome } from './components/Welcome'
@@ -11,7 +12,7 @@ import { DataProvider, useData } from './data/store'
 import { I18nProvider } from './i18n'
 import { SPRING } from './lib/motion'
 import { useTheme } from './lib/theme'
-import { UIContext } from './lib/ui'
+import { UIContext, type View } from './lib/ui'
 
 export function App() {
   return (
@@ -30,7 +31,26 @@ function Shell() {
   const { status } = useData()
   const [guide, setGuide] = useState(false)
   const [wipe, setWipe] = useState(false)
-  const ui = useMemo(() => ({ openGuide: () => setGuide(true), openWipe: () => setWipe(true) }), [])
+  const [view, setViewState] = useState<View>('overview')
+  const [query, setQuery] = useState('')
+
+  // Leaving a list clears its search; losing the data goes back home.
+  const setView = (v: View) => {
+    if (v === 'overview') setQuery('')
+    setViewState(v)
+  }
+  useEffect(() => {
+    if (status !== 'ready') {
+      setViewState('overview')
+      setQuery('')
+    }
+  }, [status])
+
+  const ui = useMemo(
+    () => ({ openGuide: () => setGuide(true), openWipe: () => setWipe(true), view, setView, query, setQuery }),
+    [view, query],
+  )
+  const screen = status !== 'ready' ? 'welcome' : view
 
   return (
     <UIContext.Provider value={ui}>
@@ -43,13 +63,13 @@ function Shell() {
             <AnimatePresence mode="wait" initial={false}>
               {status !== 'loading' && (
                 <motion.div
-                  key={status}
+                  key={screen}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0, filter: 'blur(6px)' }}
                   transition={SPRING}
                 >
-                  {status === 'ready' ? <Overview /> : <Welcome />}
+                  {screen === 'welcome' ? <Welcome /> : screen === 'overview' ? <Overview /> : <ListView list={screen} />}
                 </motion.div>
               )}
             </AnimatePresence>

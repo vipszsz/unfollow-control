@@ -5,10 +5,11 @@ import { useData } from '../data/store'
 import { fmt, useI18n } from '../i18n'
 import { SPRING_SLOW } from '../lib/motion'
 import { pickZip } from '../lib/pickFile'
+import { useUI } from '../lib/ui'
 import { Button } from './Button'
 import { ImportErrorNotice } from './ImportErrorNotice'
 import { Panel, PanelLabel } from './Panel'
-import { Tooltip } from './Tooltip'
+import { Icon } from './Icon'
 
 const STALE_DAYS = 14
 const DAY = 86_400_000
@@ -23,6 +24,7 @@ const rise = (i: number) => ({
 export function Overview() {
   const { t, lang } = useI18n()
   const { current: s, lists: l, importFile, importing } = useData()
+  const { setView } = useUI()
   if (!s || !l) return null
 
   const locale = lang === 'pt' ? 'pt-BR' : 'en'
@@ -87,11 +89,10 @@ export function Overview() {
             <p className="meter-label">
               {fmt(t.overview.heroMeter, { pct: new Intl.NumberFormat(locale, { style: 'percent' }).format(pct) })}
             </p>
-            <Tooltip label={t.comingSoon}>
-              <Button variant="primary" aria-disabled="true">
-                {t.overview.seeList}
-              </Button>
-            </Tooltip>
+            <Button variant="primary" onClick={() => setView('notFollowingBack')}>
+              {t.overview.seeList}
+              <Icon name="arrowRight" size={13} />
+            </Button>
           </Panel>
         </motion.div>
 

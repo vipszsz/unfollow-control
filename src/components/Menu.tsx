@@ -5,7 +5,7 @@ import { SPRING } from '../lib/motion'
 import { Icon, type IconName } from './Icon'
 
 export type MenuEntry =
-  | { kind?: 'item'; icon: IconName; label: string; hint?: string; danger?: boolean; disabled?: boolean; onSelect?: () => void }
+  | { kind?: 'item'; icon?: IconName; label: string; hint?: string; danger?: boolean; disabled?: boolean; checked?: boolean; onSelect?: () => void }
   | { kind: 'divider' }
 
 interface Props {
@@ -99,16 +99,18 @@ export function Menu({ entries, trigger }: Props) {
                 ) : (
                   <div
                     key={i}
-                    role="menuitem"
+                    role={e.checked === undefined ? 'menuitem' : 'menuitemradio'}
+                    aria-checked={e.checked}
                     aria-disabled={e.disabled || undefined}
                     className={`menu-item ${e.danger ? 'is-danger' : ''} ${active === i ? 'is-active' : ''}`}
                     onPointerEnter={() => !e.disabled && setActive(i)}
                     onPointerLeave={() => setActive(-1)}
                     onClick={() => select(i)}
                   >
-                    <Icon name={e.icon} size={15} />
+                    {e.icon && <Icon name={e.icon} size={15} />}
                     <span>{e.label}</span>
                     {e.hint && <span className="menu-hint">{e.hint}</span>}
+                    {e.checked && <Icon name="check" size={15} className="menu-check" />}
                   </div>
                 ),
               )}

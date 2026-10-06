@@ -17,6 +17,7 @@ export function Tooltip({ label, children }: { label: ReactNode; children: React
 
   const show = (delay: number) => {
     window.clearTimeout(timer.current)
+    if (!label) return
     timer.current = window.setTimeout(() => setOpen(true), delay)
   }
   const hide = () => {

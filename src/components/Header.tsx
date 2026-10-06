@@ -1,8 +1,11 @@
+import { motion } from 'motion/react'
+import { useEffect, useRef } from 'react'
 import { useData } from '../data/store'
 import { useI18n, type Lang } from '../i18n'
+import { SPRING } from '../lib/motion'
 import { pickZip } from '../lib/pickFile'
 import type { Theme } from '../lib/theme'
-import { useUI } from '../lib/ui'
+import { useUI, type View } from '../lib/ui'
 import { Button } from './Button'
 import { Icon } from './Icon'
 import { Menu } from './Menu'
@@ -19,17 +22,52 @@ const TABS = ['notFollowingBack', 'mutuals', 'fans', 'pending'] as const
 export function Header({ theme, onTheme }: Props) {
   const { t, lang, setLang } = useI18n()
   const { status, lists, snapshots, importing, importFile } = useData()
-  const { openGuide, openWipe } = useUI()
+  const { openGuide, openWipe, view, setView, query, setQuery } = useUI()
+  const search = useRef<HTMLInputElement>(null)
   const ready = status === 'ready'
-  const locked = ready ? t.comingSoon : t.locked
   const num = new Intl.NumberFormat(lang === 'pt' ? 'pt-BR' : 'en')
+
+  // "/" jumps to the search field from anywhere.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || !ready || (e.target as HTMLElement).closest('input, textarea') || document.querySelector('.dialog')) return
+      e.preventDefault()
+      search.current?.focus()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [ready])
+
+  const pill = (key: View, label: string, count?: number) => {
+    const on = ready && view === key
+    const btn = (
+      <button
+        type="button"
+        className={`pill ${on ? 'is-on' : ''}`}
+        aria-current={on ? 'page' : undefined}
+        aria-disabled={!ready || undefined}
+        onClick={() => ready && setView(key)}
+      >
+        {on && <motion.span layoutId="pill-on" className="pill-bg" transition={SPRING} />}
+        <span className="pill-text">{label}</span>
+        {count !== undefined && <span className="pill-count">{ready ? num.format(count) : '—'}</span>}
+      </button>
+    )
+    return ready ? (
+      <span key={key}>{btn}</span>
+    ) : (
+      <Tooltip key={key} label={t.locked}>
+        {btn}
+      </Tooltip>
+    )
+  }
 
   return (
     <header className="header">
       <div className="header-row">
         <h1 className="brand">{t.appName}</h1>
         <div className="header-actions">
-          <Tooltip label={locked}>
+          <Tooltip label={ready ? t.comingSoon : t.locked}>
             <Button variant="plain" icon="history" aria-disabled="true">
               {t.actions.history}
             </Button>
@@ -46,32 +84,50 @@ export function Header({ theme, onTheme }: Props) {
                 ? { icon: 'trash', label: t.menu.wipe, danger: true, onSelect: openWipe }
                 : { icon: 'trash', label: t.menu.wipe, hint: t.menu.wipeHint, danger: true, disabled: true },
             ]}
-            trigger={(p) => (
-              <Button {...p} variant="icon" icon="more" aria-label={t.actions.more} />
-            )}
+            trigger={(p) => <Button {...p} variant="icon" icon="more" aria-label={t.actions.more} />}
           />
         </div>
       </div>
 
       <div className="header-row">
-        <nav className="pills" aria-label="Listas">
-          {TABS.map((k, i) => (
-            <Tooltip key={k} label={locked}>
-              <button type="button" className={`pill ${i === 0 ? 'is-on' : ''}`} aria-disabled="true">
-                {t.nav[k]}
-                <span className="pill-count">{lists ? num.format(lists[k].length) : '—'}</span>
-              </button>
-            </Tooltip>
-          ))}
+        <nav className="pills" aria-label={t.list.overview}>
+          {pill('overview', t.list.overview)}
+          {TABS.map((k) => pill(k, t.nav[k], lists?.[k].length))}
         </nav>
 
         <div className="header-actions">
-          <Tooltip label={locked}>
-            <div className="search" aria-disabled="true">
+          <Tooltip label={ready ? '' : t.locked}>
+            <label className="search" aria-disabled={!ready || undefined}>
               <Icon name="search" size={14} />
-              <span className="search-placeholder">{t.actions.search}</span>
-              <kbd className="kbd">/</kbd>
-            </div>
+              <input
+                ref={search}
+                className="search-input"
+                type="text"
+                spellCheck={false}
+                autoComplete="off"
+                disabled={!ready}
+                placeholder={ready && view !== 'overview' ? t.list.search : t.actions.search}
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value)
+                  // Searching from the overview opens the main list.
+                  if (view === 'overview' && e.target.value) setView('notFollowingBack')
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setQuery('')
+                    e.currentTarget.blur()
+                  }
+                }}
+              />
+              {query ? (
+                <button type="button" className="search-clear" aria-label={t.list.clearSearch} onClick={() => setQuery('')}>
+                  ×
+                </button>
+              ) : (
+                <kbd className="kbd">/</kbd>
+              )}
+            </label>
           </Tooltip>
           <Segmented<Theme>
             label={t.theme.label}
@@ -91,7 +147,7 @@ export function Header({ theme, onTheme }: Props) {
               { value: 'en', label: 'English', content: 'EN' },
             ]}
           />
-          <Tooltip label={locked}>
+          <Tooltip label={ready ? t.comingSoon : t.locked}>
             <Button variant="ghost" icon="cards" aria-disabled="true">
               {t.actions.swipe}
             </Button>
