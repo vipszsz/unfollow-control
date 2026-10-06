@@ -7,6 +7,7 @@ import './styles/app.css'
 import './styles/screens.css'
 import './styles/list.css'
 import './styles/triage.css'
+import './styles/insights.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

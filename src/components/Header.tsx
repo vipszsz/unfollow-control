@@ -6,10 +6,11 @@ import { useI18n, type Lang } from '../i18n'
 import { SPRING } from '../lib/motion'
 import { pickZip } from '../lib/pickFile'
 import type { Theme } from '../lib/theme'
-import { useUI, type View } from '../lib/ui'
+import { hasPanel, useUI, type View } from '../lib/ui'
 import { Button } from './Button'
 import { Icon } from './Icon'
 import { Menu } from './Menu'
+import { SearchBox } from './SearchBox'
 import { Segmented } from './Segmented'
 import { Tooltip } from './Tooltip'
 
@@ -23,7 +24,7 @@ const TABS = ['notFollowingBack', 'mutuals', 'fans', 'pending'] as const
 export function Header({ theme, onTheme }: Props) {
   const { t, lang, setLang } = useI18n()
   const { status, lists, snapshots, importing, importFile, current, marks } = useData()
-  const { openGuide, openWipe, view, setView, query, setQuery } = useUI()
+  const { openGuide, openWipe, view, setView, panelUrl, togglePanel } = useUI()
   const search = useRef<HTMLInputElement>(null)
   const ready = status === 'ready'
   const num = new Intl.NumberFormat(lang === 'pt' ? 'pt-BR' : 'en')
@@ -69,8 +70,24 @@ export function Header({ theme, onTheme }: Props) {
       <div className="header-row">
         <h1 className="brand">{t.appName}</h1>
         <div className="header-actions">
-          <Tooltip label={ready ? t.comingSoon : t.locked}>
-            <Button variant="plain" icon="history" aria-disabled="true">
+          <Tooltip label={hasPanel() ? (panelUrl ? t.instagram.close : t.instagram.open) : t.instagram.browserHint}>
+            <Button
+              variant={panelUrl ? 'primary' : 'ghost'}
+              icon="instagram"
+              aria-pressed={!!panelUrl}
+              onClick={togglePanel}
+            >
+              {t.instagram.button}
+            </Button>
+          </Tooltip>
+          <Tooltip label={ready ? '' : t.locked}>
+            <Button
+              variant={view === 'history' && ready ? 'primary' : 'plain'}
+              icon="history"
+              aria-disabled={!ready || undefined}
+              aria-pressed={view === 'history'}
+              onClick={() => ready && setView(view === 'history' ? 'overview' : 'history')}
+            >
               {t.actions.history}
             </Button>
           </Tooltip>
@@ -100,37 +117,7 @@ export function Header({ theme, onTheme }: Props) {
 
         <div className="header-actions">
           <Tooltip label={ready ? '' : t.locked}>
-            <label className="search" aria-disabled={!ready || undefined}>
-              <Icon name="search" size={14} />
-              <input
-                ref={search}
-                className="search-input"
-                type="text"
-                spellCheck={false}
-                autoComplete="off"
-                disabled={!ready}
-                placeholder={ready && view !== 'overview' ? t.list.search : t.actions.search}
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value)
-                  // Searching from the overview opens the main list.
-                  if (view === 'overview' && e.target.value) setView('notFollowingBack')
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    setQuery('')
-                    e.currentTarget.blur()
-                  }
-                }}
-              />
-              {query ? (
-                <button type="button" className="search-clear" aria-label={t.list.clearSearch} onClick={() => setQuery('')}>
-                  ×
-                </button>
-              ) : (
-                <kbd className="kbd">/</kbd>
-              )}
-            </label>
+            <SearchBox ref={search} disabled={!ready} />
           </Tooltip>
           <Segmented<Theme>
             label={t.theme.label}

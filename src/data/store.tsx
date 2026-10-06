@@ -24,6 +24,7 @@ interface Data {
   restoreMark(username: string, previous: Mark | undefined): void
   importFile(file: File): Promise<void>
   clearError(): void
+  deleteSnapshot(id: string): Promise<void>
   wipe(): Promise<void>
 }
 
@@ -55,6 +56,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } finally {
       setImporting(false)
     }
+  }, [])
+
+  const deleteSnapshot = useCallback(async (id: string) => {
+    await db.deleteSnapshot(id)
+    setSnapshots((prev) => (prev ?? []).filter((s) => s.id !== id))
   }, [])
 
   const wipe = useCallback(async () => {
@@ -127,9 +133,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       restoreMark,
       importFile,
       clearError: () => setError(undefined),
+      deleteSnapshot,
       wipe,
     }
-  }, [snapshots, current, importing, error, justImported, marks, toggleReviewed, updateMark, restoreMark, importFile, wipe])
+  }, [snapshots, current, importing, error, justImported, marks, toggleReviewed, updateMark, restoreMark, importFile, deleteSnapshot, wipe])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

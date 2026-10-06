@@ -7,6 +7,14 @@ export function readPref<T extends string>(key: string, allowed: readonly T[], f
   return fallback
 }
 
+export function readNumber(key: string, fallback: number, min: number, max: number): number {
+  try {
+    const n = Number(localStorage.getItem(`uc.${key}`))
+    if (Number.isFinite(n) && n >= min && n <= max) return n
+  } catch {}
+  return fallback
+}
+
 export function writePref(key: string, value: string) {
   try {
     localStorage.setItem(`uc.${key}`, value)

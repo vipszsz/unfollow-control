@@ -1,5 +1,6 @@
 import { animate, motion, useReducedMotion } from 'motion/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { compare, exportsOf } from '../data/analyze'
 import type { Entry } from '../data/parse'
 import { useData } from '../data/store'
 import { fmt, useI18n } from '../i18n'
@@ -23,8 +24,10 @@ const rise = (i: number) => ({
 /** Summary shown after an import: the headline number plus the other lists at a glance. */
 export function Overview() {
   const { t, lang } = useI18n()
-  const { current: s, lists: l, importFile, importing } = useData()
+  const { current: s, lists: l, importFile, importing, snapshots } = useData()
   const { setView } = useUI()
+  const previous = useMemo(() => exportsOf(snapshots, s?.owner)[1], [snapshots, s])
+  const diff = useMemo(() => (s && previous ? compare(s, previous) : null), [s, previous])
   if (!s || !l) return null
 
   const locale = lang === 'pt' ? 'pt-BR' : 'en'
@@ -64,6 +67,21 @@ export function Overview() {
       </motion.div>
 
       <ImportErrorNotice />
+
+      {diff && previous && (
+        <motion.div className="teaser" {...rise(1)}>
+          <span>
+            {fmt(t.history.teaser, {
+              date: date.format(previous.exportDate ? new Date(`${previous.exportDate}T12:00:00`) : new Date(previous.importedAt)),
+              lost: num.format(diff.lost.length),
+              gained: num.format(diff.gained.length),
+            })}
+          </span>
+          <Button variant="ghost" icon="history" onClick={() => setView('history')}>
+            {t.history.see}
+          </Button>
+        </motion.div>
+      )}
 
       {age > STALE_DAYS && (
         <motion.div className="notice" role="status" {...rise(1)}>

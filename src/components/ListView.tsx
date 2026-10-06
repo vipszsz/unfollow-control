@@ -103,6 +103,8 @@ export function ListView({ list }: { list: ListKey }) {
       if (e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.dialog, .menu')) return
       if ((e.target as HTMLElement).closest('input, textarea')) return
       const row = shown[selected]
+      // Holding J/K scrolls through rows; holding O or X must not act more than once.
+      if (e.repeat && ['o', 'Enter', 'x'].includes(e.key)) return
       switch (e.key) {
         case 'j':
         case 'ArrowDown':

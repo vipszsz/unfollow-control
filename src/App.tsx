@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DropOverlay } from './components/DropOverlay'
 import { ExportGuide } from './components/ExportGuide'
 import { Header } from './components/Header'
+import { HistoryView } from './components/HistoryView'
+import { LookupView } from './components/LookupView'
 import { InstagramPanel } from './components/InstagramPanel'
 import { ListView } from './components/ListView'
 import { Overview } from './components/Overview'
@@ -33,7 +35,7 @@ export function App() {
   )
 }
 
-const PANEL_WIDTH = 460
+const PANEL_WIDTH = 472 // 460 panel + 12 gutter
 
 function Shell() {
   const { theme, setTheme } = useTheme()
@@ -44,11 +46,12 @@ function Shell() {
   const [query, setQuery] = useState('')
   const [panelUrl, setPanelUrl] = useState<string | null>(null)
   const [panelOpen, setPanelOpen] = useState(false)
+  const [lookup, setLookup] = useState<string | null>(null)
   const [unavailable, setUnavailable] = useState<{ entry: Entry | null; open: boolean }>({ entry: null, open: false })
 
   // Leaving a list clears its search; losing the data goes back home.
   const setView = useCallback((v: View) => {
-    if (v === 'overview' || v === 'swipe' || v === 'queue') setQuery('')
+    if (!['notFollowingBack', 'mutuals', 'fans', 'pending'].includes(v)) setQuery('')
     setViewState(v)
   }, [])
   useEffect(() => {
@@ -64,6 +67,19 @@ function Shell() {
     setPanelOpen(true)
   }, [])
   const openProfile = useCallback((u: string) => openInstagram(profileUrl(u)), [openInstagram])
+  const togglePanel = useCallback(() => {
+    if (!hasPanel()) return openExternal('https://www.instagram.com/')
+    if (panelOpen) return setPanelOpen(false)
+    if (!panelUrl) setPanelUrl('https://www.instagram.com/')
+    setPanelOpen(true)
+  }, [panelOpen, panelUrl])
+  const openLookup = useCallback(
+    (u: string) => {
+      setLookup(u)
+      setView('lookup')
+    },
+    [setView],
+  )
 
   const ui = useMemo(
     () => ({
@@ -77,9 +93,12 @@ function Shell() {
       openInstagram,
       panelUrl: panelOpen ? panelUrl : null,
       closePanel: () => setPanelOpen(false),
+      togglePanel,
+      lookup,
+      openLookup,
       explainUnavailable: (entry: Entry) => setUnavailable({ entry, open: true }),
     }),
-    [view, setView, query, openProfile, openInstagram, panelUrl, panelOpen],
+    [view, setView, query, openProfile, openInstagram, panelUrl, panelOpen, togglePanel, lookup, openLookup],
   )
   const screen = status !== 'ready' ? 'welcome' : view
 
@@ -95,7 +114,7 @@ function Shell() {
               <AnimatePresence mode="wait" initial={false}>
                 {status !== 'loading' && (
                   <motion.div
-                    key={screen}
+                    key={screen === 'lookup' ? `lookup-${lookup}` : screen}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0, filter: 'blur(6px)' }}
@@ -109,6 +128,10 @@ function Shell() {
                       <SwipeView />
                     ) : screen === 'queue' ? (
                       <QueueView />
+                    ) : screen === 'history' ? (
+                      <HistoryView />
+                    ) : screen === 'lookup' ? (
+                      <LookupView />
                     ) : (
                       <ListView list={screen} />
                     )}

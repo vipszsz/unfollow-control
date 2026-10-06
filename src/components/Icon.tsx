@@ -32,6 +32,9 @@ const PATHS = {
   skip: <path d="M12 19V5M6 11l6-6 6 6" />,
   queue: <path d="M4 6h16M4 12h10M4 18h7M17 15l3 3-3 3" />,
   alert: <><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5h.01" /></>,
+  instagram: <><rect x="3.5" y="3.5" width="17" height="17" rx="5" /><circle cx="12" cy="12" r="3.8" /><path d="M17.2 6.8h.01" /></>,
+  minus: <path d="M6 12h12" />,
+  plus: <path d="M12 6v12M6 12h12" />,
 } as const
 
 export type IconName = keyof typeof PATHS

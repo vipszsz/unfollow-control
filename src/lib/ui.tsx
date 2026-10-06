@@ -3,7 +3,7 @@ import type { Lists } from '../data/analyze'
 import type { Entry } from '../data/parse'
 
 export type ListKey = keyof Lists
-export type View = 'overview' | ListKey | 'swipe' | 'queue'
+export type View = 'overview' | ListKey | 'swipe' | 'queue' | 'history' | 'lookup'
 
 export interface UI {
   openGuide(): void
@@ -19,6 +19,11 @@ export interface UI {
   openInstagram(url: string): void
   panelUrl: string | null
   closePanel(): void
+  /** Header button: reopen the panel where it was, or start at Instagram's home. */
+  togglePanel(): void
+  /** Username shown in the lookup view ("who I follow that follows @x"). */
+  lookup: string | null
+  openLookup(username: string): void
   /** Explain why a profile won't open, and let the user mark it. */
   explainUnavailable(entry: Entry): void
 }

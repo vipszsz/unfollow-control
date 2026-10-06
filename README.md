@@ -2,7 +2,7 @@
 
 See who doesn't follow you back on Instagram, using Instagram's own data export, then work through them: list mode, a Tinder-style swipe mode, colored labels and an unfollow queue with Instagram's own site in a side panel.
 
-> Work in progress. Phase 4 (swipe, queue, labels, Instagram panel) of 6.
+> Work in progress. Phase 5 (history, daily goal, account lookup) of 6.
 
 ## Privacy
 

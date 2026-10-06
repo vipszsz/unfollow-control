@@ -53,6 +53,7 @@ function run<T>(store: StoreName, mode: IDBTransactionMode, fn: (s: IDBObjectSto
 export const db = {
   all: () => run<Snapshot[]>('snapshots', 'readonly', (s) => s.getAll()),
   put: (snap: Snapshot) => run('snapshots', 'readwrite', (s) => s.put(snap)),
+  deleteSnapshot: (id: string) => run('snapshots', 'readwrite', (s) => s.delete(id)),
   marks: () => run<Mark[]>('marks', 'readonly', (s) => s.getAll()),
   putMark: (m: Mark) => run('marks', 'readwrite', (s) => s.put(m)),
   deleteMark: (key: string) => run('marks', 'readwrite', (s) => s.delete(key)),

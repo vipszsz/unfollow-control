@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { queueOf, unfollowedToday } from '../data/marks'
 import type { Entry } from '../data/parse'
 import { useData } from '../data/store'
 import { fmt, useI18n } from '../i18n'
 import { SPRING } from '../lib/motion'
+import { readNumber, writePref } from '../lib/prefs'
 import { hasPanel, useUI } from '../lib/ui'
 import { Avatar } from './Avatar'
 import { Button } from './Button'
@@ -21,6 +22,12 @@ export function QueueView() {
   const items = useMemo(() => (current ? queueOf(current.following, marks) : []), [current, marks])
   const now = items[0]
   const today = unfollowedToday(marks)
+  const [goal, setGoalState] = useState(() => readNumber('dailyGoal', 30, 5, 200))
+  const setGoal = (g: number) => {
+    const v = Math.min(200, Math.max(5, g))
+    writePref('dailyGoal', String(v))
+    setGoalState(v)
+  }
   const opened = useRef<string | null>(null)
 
   const locale = lang === 'pt' ? 'pt-BR' : 'en'
@@ -41,7 +48,8 @@ export function QueueView() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.dialog, .menu')) return
+      // e.repeat: holding a key down must not decide account after account.
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.dialog, .menu')) return
       if ((e.target as HTMLElement).closest('input, textarea')) return
       if (e.key === 'd') done()
       else if (e.key === 'n') broken()
@@ -61,8 +69,38 @@ export function QueueView() {
           </h2>
           <p className="listview-about">{t.queue.about}</p>
         </div>
-        <span className="chip chip-today">{fmt(t.queue.today, { n: today })}</span>
+        <div className="goal" role="group" aria-label={t.goal.label}>
+          <span className="goal-text">{fmt(t.goal.progress, { n: today, goal })}</span>
+          <span className="meter meter-sm goal-meter">
+            <motion.span
+              className={`meter-fill ${today >= goal ? 'is-done' : ''}`}
+              initial={false}
+              animate={{ scaleX: Math.min(today / goal, 1) }}
+              transition={SPRING}
+            />
+          </span>
+          <span className="goal-step">
+            <Button variant="icon" icon="minus" aria-label={t.goal.less} onClick={() => setGoal(goal - 5)} />
+            <Button variant="icon" icon="plus" aria-label={t.goal.more} onClick={() => setGoal(goal + 5)} />
+          </span>
+        </div>
       </div>
+
+      <AnimatePresence initial={false}>
+        {today >= goal && (
+          <motion.div
+            className="notice"
+            role="status"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={SPRING}
+          >
+            <span className="notice-dot" />
+            {t.goal.reached}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {now ? (
         <>

@@ -3,8 +3,8 @@
 /* ---------- Workspace + Instagram panel ---------- */
 .workspace { flex: 1; min-height: 0; display: flex; }
 .workspace .scroll { min-width: 0; container-type: inline-size; }
-.panel-dock { flex: none; overflow: hidden; height: 100%; padding: 0 12px 12px 0; box-sizing: content-box; }
-.panel-dock-inner { height: 100%; }
+.panel-dock { flex: none; overflow: hidden; height: 100%; }
+.panel-dock-inner { height: 100%; padding: 0 12px 12px 0; box-sizing: border-box; }
 .ig-panel {
   height: 100%;
   display: flex;

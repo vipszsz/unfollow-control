@@ -77,7 +77,8 @@ export function SwipeView() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.dialog, .menu')) return
+      // e.repeat: holding a key down must not decide account after account.
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.dialog, .menu')) return
       if ((e.target as HTMLElement).closest('input, textarea')) return
       const map: Record<string, Decision> = { ArrowLeft: 'unfollow', ArrowRight: 'keep', ArrowUp: 'skip', '1': 'friend', '2': 'maybe', '3': 'brand' }
       if (map[e.key]) {
