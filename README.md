@@ -46,7 +46,7 @@ No Windows, seus dados ficam numa pasta **Unfollow Control Data**, ao lado do `.
 
 - **Baixe só daqui.** A versão oficial está apenas nos [Releases deste repositório](https://github.com/vipszsz/unfollow-control/releases). Cópias enviadas por outras pessoas ou outros sites não são verificadas.
 - **O app nunca pede sua senha.** Se alguma versão pedir usuário e senha do Instagram fora da página do próprio Instagram, ela não é oficial. Não use.
-- **Confira o arquivo (opcional).** Cada release traz um `SHA256SUMS.txt`. No Windows, rode no PowerShell `Get-FileHash .\UnfollowControl-1.0.0-portable.exe` e compare o resultado com o do arquivo. Se for diferente, o download foi alterado.
+- **Confira o arquivo (opcional).** Cada release traz um `SHA256SUMS.txt`. No Windows, rode no PowerShell `Get-FileHash .\UnfollowControl-x.y.z-portable.exe` (com o número da versão) e compare o resultado com o do arquivo. Se for diferente, o download foi alterado.
 
 ## Licença
 
