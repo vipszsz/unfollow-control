@@ -2,7 +2,7 @@
 
 See who doesn't follow you back on Instagram, using Instagram's own data export. No login, no internet: the app only reads the zip you download from Instagram, and it is blocked from making any network request.
 
-> Work in progress. Phase 1 (foundation) of 6.
+> Work in progress. Phase 2 (import) of 6.
 
 ## Privacy
 

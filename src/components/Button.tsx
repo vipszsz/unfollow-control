@@ -1,7 +1,7 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react'
 import { Icon, type IconName } from './Icon'
 
-type Variant = 'primary' | 'ghost' | 'plain' | 'icon'
+type Variant = 'primary' | 'ghost' | 'plain' | 'icon' | 'danger'
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant

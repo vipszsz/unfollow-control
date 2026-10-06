@@ -1,5 +1,8 @@
+import { useData } from '../data/store'
 import { useI18n, type Lang } from '../i18n'
+import { pickZip } from '../lib/pickFile'
 import type { Theme } from '../lib/theme'
+import { useUI } from '../lib/ui'
 import { Button } from './Button'
 import { Icon } from './Icon'
 import { Menu } from './Menu'
@@ -15,7 +18,11 @@ const TABS = ['notFollowingBack', 'mutuals', 'fans', 'pending'] as const
 
 export function Header({ theme, onTheme }: Props) {
   const { t, lang, setLang } = useI18n()
-  const locked = t.locked
+  const { status, lists, snapshots, importing, importFile } = useData()
+  const { openGuide, openWipe } = useUI()
+  const ready = status === 'ready'
+  const locked = ready ? t.comingSoon : t.locked
+  const num = new Intl.NumberFormat(lang === 'pt' ? 'pt-BR' : 'en')
 
   return (
     <header className="header">
@@ -27,15 +34,17 @@ export function Header({ theme, onTheme }: Props) {
               {t.actions.history}
             </Button>
           </Tooltip>
-          <Button variant="primary" icon="upload">
-            {t.actions.import}
+          <Button variant="primary" icon="upload" disabled={importing} onClick={() => pickZip(importFile)}>
+            {importing ? t.importing : t.actions.import}
           </Button>
           <Menu
             entries={[
-              { icon: 'help', label: t.menu.howTo, hint: t.soon, disabled: true },
+              { icon: 'help', label: t.menu.howTo, onSelect: openGuide },
               { icon: 'code', label: t.menu.github, hint: t.soon, disabled: true },
               { kind: 'divider' },
-              { icon: 'trash', label: t.menu.wipe, hint: t.menu.wipeHint, danger: true, disabled: true },
+              snapshots.length
+                ? { icon: 'trash', label: t.menu.wipe, danger: true, onSelect: openWipe }
+                : { icon: 'trash', label: t.menu.wipe, hint: t.menu.wipeHint, danger: true, disabled: true },
             ]}
             trigger={(p) => (
               <Button {...p} variant="icon" icon="more" aria-label={t.actions.more} />
@@ -50,7 +59,7 @@ export function Header({ theme, onTheme }: Props) {
             <Tooltip key={k} label={locked}>
               <button type="button" className={`pill ${i === 0 ? 'is-on' : ''}`} aria-disabled="true">
                 {t.nav[k]}
-                <span className="pill-count">—</span>
+                <span className="pill-count">{lists ? num.format(lists[k].length) : '—'}</span>
               </button>
             </Tooltip>
           ))}

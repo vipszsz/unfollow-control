@@ -39,3 +39,8 @@ export function useI18n() {
   if (!ctx) throw new Error('useI18n outside I18nProvider')
   return ctx
 }
+
+/** Fill "{name}" placeholders: fmt('Passo {n}', { n: 2 }). */
+export function fmt(s: string, vars: Record<string, string | number>) {
+  return s.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m))
+}

@@ -1,8 +1,11 @@
 import { motion } from 'motion/react'
-import { useState } from 'react'
+import { useData } from '../data/store'
 import { useI18n } from '../i18n'
 import { SPRING_SLOW } from '../lib/motion'
+import { pickZip } from '../lib/pickFile'
+import { useUI } from '../lib/ui'
 import { Icon, type IconName } from './Icon'
+import { ImportErrorNotice } from './ImportErrorNotice'
 import { Panel, PanelLabel, type Tint } from './Panel'
 
 const PRIVACY: { key: 'noLogin' | 'offline' | 'local'; icon: IconName; tint: Tint; label: string }[] = [
@@ -17,10 +20,12 @@ const rise = (i: number) => ({
   transition: { ...SPRING_SLOW, delay: 0.05 + i * 0.06 },
 })
 
-/** Empty state shown until a zip is imported. The dropzone becomes functional in phase 2. */
+/** Empty state shown until a zip is imported. Drops anywhere in the window are handled by DropOverlay. */
 export function Welcome() {
   const { t } = useI18n()
-  const [over, setOver] = useState(false)
+  const { importing, error, importFile } = useData()
+  const { openGuide } = useUI()
+  const pick = () => !importing && pickZip(importFile)
 
   return (
     <section className="welcome">
@@ -31,32 +36,31 @@ export function Welcome() {
       </div>
 
       <motion.div {...rise(3)}>
-        <PanelLabel live={false}>import_zip</PanelLabel>
+        <PanelLabel live={importing}>import_zip</PanelLabel>
         <Panel
           tint="sky"
-          className={`dropzone ${over ? 'is-over' : ''}`}
+          className={`dropzone ${importing ? 'is-busy' : ''}`}
           role="button"
           tabIndex={0}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setOver(true)
-          }}
-          onDragLeave={() => setOver(false)}
-          onDrop={(e) => {
-            e.preventDefault()
-            setOver(false)
-          }}
+          aria-busy={importing}
+          onClick={pick}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), pick())}
         >
           <span className="dropzone-icon">
-            <Icon name="zip" size={22} />
+            {importing ? <span className="spinner" /> : <Icon name="zip" size={22} />}
           </span>
-          <strong>{t.welcome.drop}</strong>
-          <span className="dropzone-hint">{t.welcome.dropHint}</span>
+          <strong>{importing ? t.importing : t.welcome.drop}</strong>
+          {!importing && <span className="dropzone-hint">{t.welcome.dropHint}</span>}
         </Panel>
-        <button type="button" className="link" aria-disabled="true">
-          {t.welcome.howTo}
-          <Icon name="arrowRight" size={13} />
-        </button>
+
+        <ImportErrorNotice />
+
+        {!error && (
+          <button type="button" className="link" onClick={openGuide}>
+            {t.welcome.howTo}
+            <Icon name="arrowRight" size={13} />
+          </button>
+        )}
       </motion.div>
 
       <div className="privacy">
