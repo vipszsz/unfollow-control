@@ -1,7 +1,7 @@
 {
   "name": "unfollow-control",
   "productName": "Unfollow Control",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Veja quem não te segue de volta no Instagram a partir do export oficial. Sem login, sem internet.",
   "type": "module",
@@ -11,7 +11,7 @@
     "dev:web": "vite",
     "build": "tsc -b && vite build",
     "build:web": "tsc -b && vite build --mode web && node scripts/name-web-build.cjs",
-    "dist": "npm run build && electron-builder --win portable && npm run build:web && node scripts/checksums.cjs",
+    "dist": "npm run build && electron-builder --win && npm run build:web && node scripts/checksums.cjs",
     "start": "npm run build && electron .",
     "typecheck": "tsc -b"
   },
@@ -51,6 +51,12 @@
     "win": {
       "target": [
         {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
           "target": "portable",
           "arch": [
             "x64"
@@ -61,6 +67,15 @@
     },
     "portable": {
       "artifactName": "UnfollowControl-${version}-portable.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Unfollow Control",
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "UnfollowControl-${version}-setup.${ext}"
     }
   }
 }

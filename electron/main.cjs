@@ -95,9 +95,24 @@ function createWindow() {
   else win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'))
 }
 
+// Chromium writes cookies to disk only every ~30 s. Flush the Instagram session after each
+// page load and before quitting, so a forced close right after logging in keeps the login.
+const flushInstagram = () => session.fromPartition(IG_PARTITION).cookies.flushStore().catch(() => {})
+let flushed = false
+app.on('before-quit', (e) => {
+  if (flushed) return
+  e.preventDefault()
+  flushInstagram().finally(() => {
+    flushed = true
+    app.quit()
+  })
+})
+
 // Inside the Instagram panel: stay on Instagram, send anything else to the browser.
 app.on('web-contents-created', (_e, contents) => {
   if (contents.getType() !== 'webview') return
+  contents.on('did-finish-load', flushInstagram)
+  contents.on('did-navigate-in-page', flushInstagram)
   contents.setWindowOpenHandler(({ url }) => {
     if (isInstagram(url)) contents.loadURL(url)
     else openExternal(url)

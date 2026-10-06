@@ -17,12 +17,13 @@ Vá em **[Releases](https://github.com/vipszsz/unfollow-control/releases/latest)
 
 | Sistema | Arquivo | Como abrir |
 |---|---|---|
-| **Windows** | `UnfollowControl-x.y.z-portable.exe` | Um arquivo só, sem instalação. Dê dois cliques. |
+| **Windows (recomendado)** | `UnfollowControl-x.y.z-setup.exe` | Instala só para o seu usuário (não pede administrador) e cria atalhos. Seus dados e o login do Instagram ficam salvos entre versões. |
+| **Windows portátil** | `UnfollowControl-x.y.z-portable.exe` | Sem instalação. Os dados ficam numa pasta ao lado do `.exe`: mantenha sempre na mesma pasta, senão o app começa do zero. |
 | **Mac, Linux, outros** | `UnfollowControl-x.y.z.html` | Abra no Chrome, Edge ou Firefox. Não tem o painel do Instagram: os perfis abrem numa aba nova. |
 
 **Aviso do Windows na primeira vez.** O app não tem assinatura digital (ela é paga), então o Windows mostra *"O Windows protegeu o computador"*. Clique em **Mais informações → Executar assim mesmo**. O código está todo aqui no repositório para quem quiser conferir.
 
-No Windows, seus dados ficam numa pasta **Unfollow Control Data**, ao lado do `.exe`. Para apagar tudo, use *… → Apagar todos os dados* no app ou apague essa pasta.
+Onde ficam seus dados: na versão instalada, em `%APPDATA%\Unfollow Control`; na portátil, na pasta **Unfollow Control Data** ao lado do `.exe`. Para apagar tudo, use *… → Apagar todos os dados* e *Sair do Instagram* no app, ou apague essa pasta.
 
 ## Como usar
 
@@ -69,7 +70,7 @@ Feito com Vite, React, TypeScript, Motion e Electron. As animações seguem a sk
 
 **Unfollow Control** shows who doesn't follow you back on Instagram, using Instagram's own data export. No password, no bot, no server: everything runs on your computer.
 
-- **Download** from [Releases](https://github.com/vipszsz/unfollow-control/releases/latest): the portable `.exe` for Windows, or `UnfollowControl-x.y.z.html` for any other system (no Instagram panel there; profiles open in a new tab). Windows will warn that the app is unsigned. Click *More info → Run anyway*.
+- **Download** from [Releases](https://github.com/vipszsz/unfollow-control/releases/latest): the `-setup.exe` installer for Windows (recommended: keeps your data and Instagram login across updates), the portable `.exe` (keep it in the same folder), or `UnfollowControl-x.y.z.html` for any other system (no Instagram panel there; profiles open in a new tab). Windows will warn that the app is unsigned. Click *More info → Run anyway*.
 - **Use:** export *Followers and following* from Instagram's Accounts Center as **JSON**, *All time*, and drop the `.zip` into the app. Then use the lists, swipe mode, labels, unfollow queue, history and account lookup. The app is in Portuguese and English.
 - **Security:** only download from this repo's [Releases](https://github.com/vipszsz/unfollow-control/releases). The app never asks for your password; any copy that does is not official. Each release includes `SHA256SUMS.txt` to verify the files.
 - **License:** [MIT](LICENSE), provided "as is", without warranty.
