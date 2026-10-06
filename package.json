@@ -11,7 +11,7 @@
     "dev:web": "vite",
     "build": "tsc -b && vite build",
     "build:web": "tsc -b && vite build --mode web && node scripts/name-web-build.cjs",
-    "dist": "npm run build && electron-builder --win portable && npm run build:web",
+    "dist": "npm run build && electron-builder --win portable && npm run build:web && node scripts/checksums.cjs",
     "start": "npm run build && electron .",
     "typecheck": "tsc -b"
   },
@@ -33,6 +33,7 @@
     "wait-on": "^9.5.1"
   },
   "author": "vipszsz",
+  "license": "MIT",
   "homepage": "https://github.com/vipszsz/unfollow-control",
   "build": {
     "appId": "app.unfollowcontrol",

@@ -42,6 +42,16 @@ No Windows, seus dados ficam numa pasta **Unfollow Control Data**, ao lado do `.
 - **Só o Instagram fica online.** O app em si é bloqueado para acessar a internet (`electron/main.cjs`). O painel do Instagram é uma sessão separada que só alcança domínios do Instagram e da Meta. O app não lê nem clica nada nessa página: quem deixa de seguir é você. *… → Sair do Instagram* apaga a sessão.
 - **Nada é automatizado.** Nada de API não oficial nem de ações em massa. Por isso sua conta não corre o risco de ser bloqueada por comportamento de bot.
 
+## Segurança
+
+- **Baixe só daqui.** A versão oficial está apenas nos [Releases deste repositório](https://github.com/vipszsz/unfollow-control/releases). Cópias enviadas por outras pessoas ou outros sites não são verificadas.
+- **O app nunca pede sua senha.** Se alguma versão pedir usuário e senha do Instagram fora da página do próprio Instagram, ela não é oficial. Não use.
+- **Confira o arquivo (opcional).** Cada release traz um `SHA256SUMS.txt`. No Windows, rode no PowerShell `Get-FileHash .\UnfollowControl-1.0.0-portable.exe` e compare o resultado com o do arquivo. Se for diferente, o download foi alterado.
+
+## Licença
+
+[MIT](LICENSE). Qualquer pessoa pode usar, modificar e redistribuir o código. O software é fornecido "como está", sem garantia.
+
 ## Desenvolvimento
 
 ```bash
@@ -61,4 +71,6 @@ Feito com Vite, React, TypeScript, Motion e Electron. As animações seguem a sk
 
 - **Download** from [Releases](https://github.com/vipszsz/unfollow-control/releases/latest): the portable `.exe` for Windows, or `UnfollowControl-x.y.z.html` for any other system (no Instagram panel there; profiles open in a new tab). Windows will warn that the app is unsigned. Click *More info → Run anyway*.
 - **Use:** export *Followers and following* from Instagram's Accounts Center as **JSON**, *All time*, and drop the `.zip` into the app. Then use the lists, swipe mode, labels, unfollow queue, history and account lookup. The app is in Portuguese and English.
+- **Security:** only download from this repo's [Releases](https://github.com/vipszsz/unfollow-control/releases). The app never asks for your password; any copy that does is not official. Each release includes `SHA256SUMS.txt` to verify the files.
+- **License:** [MIT](LICENSE), provided "as is", without warranty.
 - **Privacy:** the app itself can't reach the network. The optional Instagram panel is a separate, sandboxed session limited to Instagram/Meta domains. You log in on Instagram's own page and unfollow yourself; the app never reads or clicks anything there.
