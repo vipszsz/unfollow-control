@@ -8,6 +8,8 @@ export type View = 'overview' | ListKey | 'swipe' | 'queue' | 'history' | 'looku
 export interface UI {
   openGuide(): void
   openWipe(): void
+  /** "Send everyone to the queue" dialog. */
+  openBulkQueue(): void
   view: View
   setView(v: View): void
   /** Text in the header search; filters the open list. */

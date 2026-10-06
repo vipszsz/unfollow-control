@@ -262,6 +262,30 @@ export const pt = {
     ],
     note: 'Essa lista vem do próprio Instagram: o export não traz quem segue outras contas.',
   },
+  bulk: {
+    cta: 'Mandar {n} para a fila',
+    continue: 'Continuar a fila ({n})',
+    reviewFirst: 'Quer revisar antes? Modo swipe',
+    title: 'Mandar para a fila de unfollow',
+    body: 'Todas as contas que não te seguem de volta vão para a fila. Nada é desfeito no Instagram: na fila, você abre cada perfil e decide entre deixar de seguir ou manter.',
+    keepOut: 'Ficam de fora',
+    groups: {
+      closeFriends: { title: 'Melhores Amigos', body: 'Sua lista de Melhores Amigos do Instagram.' },
+      kept: { title: 'Que você já decidiu manter', body: 'Etiquetas Amigo e Marca/Artista, e as que você manteve no swipe.' },
+      recent: { title: 'Seguidas nos últimos 30 dias', body: 'Talvez ainda nem tenham visto o seu follow.' },
+      unavailable: { title: 'Perfis que não abrem', body: 'Marcadas como “não abre”.' },
+    },
+    always: 'Contas excluídas e as que já estão na fila nunca entram.',
+    confirm: 'Mandar {n} para a fila',
+    none: 'Nenhuma conta para mandar',
+    cancel: 'Cancelar',
+  },
+  emptyQueue: {
+    button: 'Esvaziar fila',
+    title: 'Esvaziar a fila?',
+    body: 'As {n} contas saem da fila e voltam a ficar sem decisão. Nada muda no Instagram.',
+    confirm: 'Esvaziar fila',
+  },
 }
 
 export type Dict = typeof pt

@@ -22,6 +22,8 @@ interface Data {
   updateMark(username: string, patch: MarkPatch): Mark | undefined
   /** Put back exactly what updateMark returned. */
   restoreMark(username: string, previous: Mark | undefined): void
+  /** Apply the same change to many accounts at once (one write). */
+  updateMany(usernames: string[], patch: MarkPatch): void
   importFile(file: File): Promise<void>
   clearError(): void
   deleteSnapshot(id: string): Promise<void>
@@ -110,6 +112,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [owner, write],
   )
 
+  const updateMany = useCallback(
+    (us: string[], patch: MarkPatch) => {
+      const map = new Map(marksRef.current)
+      const put: Mark[] = []
+      const del: string[] = []
+      const now = Date.now()
+      for (const u of us) {
+        const key = `${owner}|${u}`
+        const next: Mark = { ...map.get(key), ...patch, key }
+        if ('tag' in patch) next.decidedAt = patch.tag ? now : undefined
+        if (isEmptyMark(next)) {
+          map.delete(key)
+          del.push(key)
+        } else {
+          map.set(key, next)
+          put.push(next)
+        }
+      }
+      marksRef.current = map
+      setAllMarks(map)
+      db.writeMarks(put, del).catch(() => {})
+    },
+    [owner],
+  )
+
   const restoreMark = useCallback((u: string, previous: Mark | undefined) => write(`${owner}|${u}`, previous), [owner, write])
 
   const toggleReviewed = useCallback(
@@ -132,12 +159,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       toggleReviewed,
       updateMark,
       restoreMark,
+      updateMany,
       importFile,
       clearError: () => setError(undefined),
       deleteSnapshot,
       wipe,
     }
-  }, [snapshots, current, importing, error, justImported, marks, toggleReviewed, updateMark, restoreMark, importFile, deleteSnapshot, wipe])
+  }, [snapshots, current, importing, error, justImported, marks, toggleReviewed, updateMark, restoreMark, updateMany, importFile, deleteSnapshot, wipe])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

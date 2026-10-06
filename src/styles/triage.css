@@ -261,3 +261,29 @@
   .row .chip { display: none; }
   .swipe-tags { margin-left: 0; width: 100%; justify-content: center; }
 }
+
+/* ---------- Bulk queue ---------- */
+.hero-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero-links { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 12px; }
+.hero-links .link { margin: 6px 0 0; }
+.bulk-label { margin: 0 0 8px; font: 600 12px/1 var(--font-text); letter-spacing: 0.04em; text-transform: uppercase; color: var(--mut); }
+.bulk-groups { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.bulk-groups li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  border-radius: var(--r);
+  background: var(--glass);
+  border: 1px solid var(--line);
+}
+.bulk-groups li.is-empty { opacity: 0.55; }
+.bulk-text { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.bulk-text strong { font-weight: 600; font-size: 13.5px; }
+.bulk-text span { font-size: 12.5px; color: var(--mut); }
+.bulk-count { margin-left: 6px; color: var(--mut); font-weight: 500; font-variant-numeric: tabular-nums; }
+.bulk-always { margin: 12px 0 20px; font-size: 12px; color: var(--mut); }
+
+/* ---------- Queue extras ---------- */
+.kbd-in { margin-left: 4px; color: inherit; border-color: currentColor; opacity: 0.6; }
+.queue-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }

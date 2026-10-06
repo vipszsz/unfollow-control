@@ -114,7 +114,7 @@ export function Header({ theme, onTheme }: Props) {
         <nav className="pills" aria-label={t.list.overview}>
           {pill('overview', t.list.overview)}
           {TABS.map((k) => pill(k, t.nav[k], lists?.[k].length))}
-          {ready && (queued > 0 || view === 'queue') && pill('queue', t.queue.title, queued, 'red')}
+          {ready && pill('queue', t.queue.title, queued, queued ? 'red' : undefined)}
         </nav>
 
         <div className="header-actions">

@@ -1,5 +1,6 @@
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { BulkQueueDialog } from './components/BulkQueueDialog'
 import { DropOverlay } from './components/DropOverlay'
 import { ExportGuide } from './components/ExportGuide'
 import { Header } from './components/Header'
@@ -42,6 +43,7 @@ function Shell() {
   const { status } = useData()
   const [guide, setGuide] = useState(false)
   const [wipe, setWipe] = useState(false)
+  const [bulk, setBulk] = useState(false)
   const [view, setViewState] = useState<View>('overview')
   const [query, setQuery] = useState('')
   const [panelUrl, setPanelUrl] = useState<string | null>(null)
@@ -85,6 +87,7 @@ function Shell() {
     () => ({
       openGuide: () => setGuide(true),
       openWipe: () => setWipe(true),
+      openBulkQueue: () => setBulk(true),
       view,
       setView,
       query,
@@ -160,6 +163,7 @@ function Shell() {
       <DropOverlay />
       <ExportGuide open={guide} onClose={() => setGuide(false)} />
       <WipeDialog open={wipe} onClose={() => setWipe(false)} />
+      <BulkQueueDialog open={bulk} onClose={() => setBulk(false)} />
       <UnavailableSheet
         entry={unavailable.entry}
         open={unavailable.open}

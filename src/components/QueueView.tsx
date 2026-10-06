@@ -9,6 +9,7 @@ import { readNumber, writePref } from '../lib/prefs'
 import { hasPanel, useUI } from '../lib/ui'
 import { Avatar } from './Avatar'
 import { Button } from './Button'
+import { Dialog } from './Dialog'
 import { Panel, PanelLabel } from './Panel'
 
 /**
@@ -17,8 +18,9 @@ import { Panel, PanelLabel } from './Panel'
  */
 export function QueueView() {
   const { t, lang } = useI18n()
-  const { current, marks, updateMark } = useData()
-  const { openProfile, explainUnavailable, setView } = useUI()
+  const { current, marks, updateMark, updateMany } = useData()
+  const { openProfile, explainUnavailable, setView, openBulkQueue } = useUI()
+  const [confirmEmpty, setConfirmEmpty] = useState(false)
   const items = useMemo(() => (current ? queueOf(current.following, marks) : []), [current, marks])
   const now = items[0]
   const today = unfollowedToday(marks)
@@ -126,11 +128,13 @@ export function QueueView() {
                   <Button variant="plain" icon="alert" onClick={broken}>
                     {t.queue.unavailable}
                   </Button>
-                  <Button variant="plain" icon="heart" onClick={keep}>
+                  <Button variant="ghost" icon="heart" onClick={keep}>
                     {t.queue.keep}
+                    <kbd className="kbd kbd-in">M</kbd>
                   </Button>
                   <Button variant="primary" icon="check" onClick={done}>
                     {t.queue.done}
+                    <kbd className="kbd kbd-in">D</kbd>
                   </Button>
                 </div>
               </Panel>
@@ -159,22 +163,54 @@ export function QueueView() {
             </ul>
           )}
 
+          <div className="queue-foot">
           <div className="keys" aria-hidden="true">
             <span><kbd className="kbd">D</kbd>{t.queue.keys.done}</span>
             <span><kbd className="kbd">N</kbd>{t.queue.keys.unavailable}</span>
             <span><kbd className="kbd">M</kbd>{t.queue.keys.keep}</span>
             <span><kbd className="kbd">O</kbd>{t.list.keys.open}</span>
           </div>
+          <Button variant="plain" icon="trash" onClick={() => setConfirmEmpty(true)}>
+            {t.emptyQueue.button}
+          </Button>
+          </div>
         </>
       ) : (
         <Panel tint="sky" className="deck-done">
           <h3>{t.queue.empty}</h3>
           <p>{t.queue.emptyHint}</p>
-          <Button variant="primary" icon="cards" onClick={() => setView('swipe')}>
-            {t.queue.openSwipe}
-          </Button>
+          <div className="dialog-actions">
+            <Button variant="ghost" icon="cards" onClick={() => setView('swipe')}>
+              {t.queue.openSwipe}
+            </Button>
+            <Button variant="primary" icon="queue" onClick={openBulkQueue}>
+              {t.bulk.title}
+            </Button>
+          </div>
         </Panel>
       )}
+
+      <Dialog open={confirmEmpty} onClose={() => setConfirmEmpty(false)} title={t.emptyQueue.title} width={420}>
+        <p className="dialog-body">{fmt(t.emptyQueue.body, { n: items.length })}</p>
+        <div className="dialog-actions">
+          <Button variant="ghost" onClick={() => setConfirmEmpty(false)} data-autofocus>
+            {t.wipe.cancel}
+          </Button>
+          <Button
+            variant="danger"
+            icon="trash"
+            onClick={() => {
+              updateMany(
+                items.map((e) => e.u),
+                { tag: undefined },
+              )
+              setConfirmEmpty(false)
+            }}
+          >
+            {t.emptyQueue.confirm}
+          </Button>
+        </div>
+      </Dialog>
     </section>
   )
 }

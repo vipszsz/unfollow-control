@@ -1,6 +1,7 @@
 import { animate, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 import { compare, exportsOf } from '../data/analyze'
+import { bulkCandidates, queueOf } from '../data/marks'
 import type { Entry } from '../data/parse'
 import { useData } from '../data/store'
 import { fmt, useI18n } from '../i18n'
@@ -24,8 +25,15 @@ const rise = (i: number) => ({
 /** Summary shown after an import: the headline number plus the other lists at a glance. */
 export function Overview() {
   const { t, lang } = useI18n()
-  const { current: s, lists: l, importFile, importing, snapshots } = useData()
-  const { setView } = useUI()
+  const { current: s, lists: l, importFile, importing, snapshots, marks } = useData()
+  const { setView, openBulkQueue } = useUI()
+  const queued = useMemo(() => (s ? queueOf(s.following, marks).length : 0), [s, marks])
+  // What the bulk dialog would send with its default rules (every exclusion on).
+  const toSend = useMemo(() => {
+    if (!s || !l) return 0
+    const { pool, groups } = bulkCandidates(s, l.notFollowingBack, marks)
+    return pool.filter((e) => !Object.values(groups).some((g) => g.has(e.u))).length
+  }, [s, l, marks])
   const previous = useMemo(() => exportsOf(snapshots, s?.owner)[1], [snapshots, s])
   const diff = useMemo(() => (s && previous ? compare(s, previous) : null), [s, previous])
   if (!s || !l) return null
@@ -107,10 +115,34 @@ export function Overview() {
             <p className="meter-label">
               {fmt(t.overview.heroMeter, { pct: new Intl.NumberFormat(locale, { style: 'percent' }).format(pct) })}
             </p>
-            <Button variant="primary" onClick={() => setView('notFollowingBack')}>
-              {t.overview.seeList}
-              <Icon name="arrowRight" size={13} />
-            </Button>
+            <div className="hero-actions">
+              {toSend > 0 ? (
+                <Button variant="primary" icon="queue" onClick={openBulkQueue}>
+                  {fmt(t.bulk.cta, { n: num.format(toSend) })}
+                </Button>
+              ) : (
+                queued > 0 && (
+                  <Button variant="primary" icon="queue" onClick={() => setView('queue')}>
+                    {fmt(t.bulk.continue, { n: num.format(queued) })}
+                  </Button>
+                )
+              )}
+              {toSend > 0 && queued > 0 && (
+                <Button variant="ghost" onClick={() => setView('queue')}>
+                  {fmt(t.bulk.continue, { n: num.format(queued) })}
+                </Button>
+              )}
+            </div>
+            <div className="hero-links">
+              <button type="button" className="link" onClick={() => setView('swipe')}>
+                {t.bulk.reviewFirst}
+                <Icon name="arrowRight" size={13} />
+              </button>
+              <button type="button" className="link" onClick={() => setView('notFollowingBack')}>
+                {t.overview.seeList}
+                <Icon name="arrowRight" size={13} />
+              </button>
+            </div>
           </Panel>
         </motion.div>
 

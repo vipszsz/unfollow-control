@@ -50,6 +50,27 @@ function run<T>(store: StoreName, mode: IDBTransactionMode, fn: (s: IDBObjectSto
   )
 }
 
+/** Many puts/deletes of marks in one transaction (bulk queue, empty queue). */
+function writeMarks(put: Mark[], del: string[]): Promise<void> {
+  return open().then(
+    (db) =>
+      new Promise<void>((resolve, reject) => {
+        const tx = db.transaction('marks', 'readwrite')
+        const store = tx.objectStore('marks')
+        for (const m of put) store.put(m)
+        for (const k of del) store.delete(k)
+        tx.oncomplete = () => {
+          db.close()
+          resolve()
+        }
+        tx.onerror = () => {
+          db.close()
+          reject(tx.error)
+        }
+      }),
+  )
+}
+
 export const db = {
   all: () => run<Snapshot[]>('snapshots', 'readonly', (s) => s.getAll()),
   put: (snap: Snapshot) => run('snapshots', 'readwrite', (s) => s.put(snap)),
@@ -57,5 +78,6 @@ export const db = {
   marks: () => run<Mark[]>('marks', 'readonly', (s) => s.getAll()),
   putMark: (m: Mark) => run('marks', 'readwrite', (s) => s.put(m)),
   deleteMark: (key: string) => run('marks', 'readwrite', (s) => s.delete(key)),
+  writeMarks,
   clear: () => Promise.all([run('snapshots', 'readwrite', (s) => s.clear()), run('marks', 'readwrite', (s) => s.clear())]),
 }

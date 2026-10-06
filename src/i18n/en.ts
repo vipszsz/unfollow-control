@@ -264,4 +264,28 @@ export const en: Dict = {
     ],
     note: 'This list comes from Instagram itself: the export doesn’t include who follows other accounts.',
   },
+  bulk: {
+    cta: 'Send {n} to the queue',
+    continue: 'Continue the queue ({n})',
+    reviewFirst: 'Want to review first? Swipe mode',
+    title: 'Send to the unfollow queue',
+    body: 'Every account that doesn’t follow you back goes to the queue. Nothing changes on Instagram: in the queue you open each profile and choose to unfollow or keep.',
+    keepOut: 'Kept out',
+    groups: {
+      closeFriends: { title: 'Close Friends', body: 'Your Instagram Close Friends list.' },
+      kept: { title: 'Ones you already chose to keep', body: 'Friend and Brand/Artist labels, and the ones you kept in swipe mode.' },
+      recent: { title: 'Followed in the last 30 days', body: 'They may not have seen your follow yet.' },
+      unavailable: { title: 'Profiles that won’t open', body: 'Marked as “won’t open”.' },
+    },
+    always: 'Deleted accounts and ones already in the queue are never added.',
+    confirm: 'Send {n} to the queue',
+    none: 'No accounts to send',
+    cancel: 'Cancel',
+  },
+  emptyQueue: {
+    button: 'Empty queue',
+    title: 'Empty the queue?',
+    body: 'All {n} accounts leave the queue and go back to undecided. Nothing changes on Instagram.',
+    confirm: 'Empty queue',
+  },
 }
