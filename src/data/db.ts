@@ -8,6 +8,13 @@ export interface Mark {
   /** `${owner}|${username}` */
   key: string
   reviewed?: boolean
+  tag?: 'friend' | 'maybe' | 'brand' | 'queue'
+  /** The profile doesn't open (renamed, deactivated, deleted…). */
+  unavailable?: boolean
+  /** When the user confirmed they unfollowed the account. */
+  unfollowedAt?: number
+  /** When the tag was last set; orders the unfollow queue. */
+  decidedAt?: number
 }
 
 type StoreName = 'snapshots' | 'marks'

@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
+import { isDeleted, isHandled, isUnavailable, TAGS, type Tag } from '../data/marks'
 import type { Entry } from '../data/parse'
 import { useData } from '../data/store'
 import { fmt, useI18n } from '../i18n'
 import { SPRING } from '../lib/motion'
-import { openExternal, readPref, writePref } from '../lib/prefs'
+import { readPref, writePref } from '../lib/prefs'
 import { useUI, type ListKey } from '../lib/ui'
 import { Avatar } from './Avatar'
 import { Button } from './Button'
@@ -12,11 +13,13 @@ import { Icon } from './Icon'
 import { Menu } from './Menu'
 import { Panel, PanelLabel } from './Panel'
 import { Switch } from './Switch'
+import { StatusChip, TAG_COLOR, TagMenu } from './Tags'
 import { Tooltip } from './Tooltip'
 
 const PAGE = 10
 const SORTS = ['oldest', 'newest', 'az', 'za'] as const
 type Sort = (typeof SORTS)[number]
+type Filter = 'all' | 'none' | Tag | 'unavailable' | 'unfollowed'
 
 const LABELS: Record<ListKey, string> = {
   notFollowingBack: 'not_following_back',
@@ -25,9 +28,6 @@ const LABELS: Record<ListKey, string> = {
   pending: 'pending_requests',
 }
 
-export const profileUrl = (u: string) => `https://www.instagram.com/${u}/`
-/** Accounts deleted since you followed them show up as "__deleted__xyz" in the export. */
-export const isDeleted = (u: string) => u.startsWith('__deleted__')
 
 function sortRows(rows: Entry[], sort: Sort) {
   const out = [...rows]
@@ -42,7 +42,8 @@ function sortRows(rows: Entry[], sort: Sort) {
 export function ListView({ list }: { list: ListKey }) {
   const { t, lang } = useI18n()
   const { lists, marks, toggleReviewed } = useData()
-  const { query, setQuery } = useUI()
+  const { query, setQuery, openProfile, explainUnavailable } = useUI()
+  const [filter, setFilter] = useState<Filter>('all')
   const [sort, setSortState] = useState<Sort>(() => readPref('sort', SORTS, 'oldest'))
   const [hideReviewed, setHideState] = useState(() => readPref('hideReviewed', ['1', '0'], '0') === '1')
   const [[page, dir], setPage] = useState<[number, number]>([0, 1])
@@ -57,12 +58,20 @@ export function ListView({ list }: { list: ListKey }) {
 
   const rows = useMemo(() => {
     const filtered = all.filter(
-      (e) => (!q || e.u.includes(q) || e.name?.toLowerCase().includes(q)) && !(hideReviewed && marks.get(e.u)?.reviewed),
+      (e) => {
+        const m = marks.get(e.u)
+        if (q && !e.u.includes(q) && !e.name?.toLowerCase().includes(q)) return false
+        if (hideReviewed && (isHandled(m) || isDeleted(e.u))) return false
+        if (filter === 'none') return !m?.tag
+        if (filter === 'unavailable') return isUnavailable(e.u, m)
+        if (filter === 'unfollowed') return !!m?.unfollowedAt
+        return filter === 'all' || m?.tag === filter
+      },
     )
     return sortRows(filtered, sort)
-  }, [all, q, sort, hideReviewed, marks])
+  }, [all, q, sort, hideReviewed, marks, filter])
 
-  const reviewedCount = useMemo(() => all.filter((e) => marks.get(e.u)?.reviewed).length, [all, marks])
+  const reviewedCount = useMemo(() => all.filter((e) => isHandled(marks.get(e.u)) || isDeleted(e.u)).length, [all, marks])
   const pages = Math.max(1, Math.ceil(rows.length / PAGE))
   const current = Math.min(page, pages - 1)
   const shown = rows.slice(current * PAGE, current * PAGE + PAGE)
@@ -72,7 +81,7 @@ export function ListView({ list }: { list: ListKey }) {
   useEffect(() => {
     setPage([0, 1])
     setSel(0)
-  }, [list, q, sort, hideReviewed])
+  }, [list, q, sort, hideReviewed, filter])
 
   const goPage = (to: number, selectAt = 0) => {
     if (to < 0 || to >= pages || to === current) return
@@ -115,7 +124,7 @@ export function ListView({ list }: { list: ListKey }) {
           break
         case 'o':
         case 'Enter':
-          if (row && !isDeleted(row.u)) openExternal(profileUrl(row.u))
+          if (row) (isUnavailable(row.u, marks.get(row.u)) ? explainUnavailable(row) : openProfile(row.u))
           break
         case 'x':
           if (row) toggleReviewed(row.u)
@@ -163,6 +172,24 @@ export function ListView({ list }: { list: ListKey }) {
               </Button>
             )}
           />
+          <Menu
+            entries={[
+              { label: t.tags.all, checked: filter === 'all', onSelect: () => setFilter('all') },
+              { label: t.tags.none, checked: filter === 'none', onSelect: () => setFilter('none') },
+              { kind: 'divider' as const },
+              ...TAGS.map((tag) => ({ dot: TAG_COLOR[tag], label: t.tags[tag], checked: filter === tag, onSelect: () => setFilter(tag) })),
+              { kind: 'divider' as const },
+              { icon: 'alert' as const, label: t.tags.unavailable, checked: filter === 'unavailable', onSelect: () => setFilter('unavailable') },
+              { icon: 'check' as const, label: t.tags.unfollowed, checked: filter === 'unfollowed', onSelect: () => setFilter('unfollowed') },
+            ]}
+            trigger={(p) => (
+              <Button {...p} variant={filter === 'all' ? 'ghost' : 'primary'} icon="tag">
+                {filter === 'all' ? t.tags.filter : filter === 'none' ? t.tags.none : t.tags[filter]}
+                <Icon name="chevronDown" size={13} />
+              </Button>
+            )}
+          />
+          <span className="toolbar-spacer" />
           <Switch checked={hideReviewed} onChange={setHide} label={t.list.hideReviewed} />
         </div>
 
@@ -185,13 +212,15 @@ export function ListView({ list }: { list: ListKey }) {
               >
                 <AnimatePresence initial={false}>
                   {shown.map((e, i) => {
-                    const reviewed = !!marks.get(e.u)?.reviewed
+                    const m = marks.get(e.u)
+                    const reviewed = !!m?.reviewed
                     const gone = isDeleted(e.u)
+                    const broken = isUnavailable(e.u, m)
                     return (
                       <motion.li
                         key={e.u}
                         layout="position"
-                        className={`row ${reviewed ? 'is-reviewed' : ''}`}
+                        className={`row ${isHandled(m) || gone ? 'is-reviewed' : ''}`}
                         exit={{ opacity: 0, x: -16, transition: { duration: 0.18 } }}
                         transition={SPRING}
                         onPointerDown={() => setSel(i)}
@@ -206,6 +235,8 @@ export function ListView({ list }: { list: ListKey }) {
                             {since(e)}
                           </span>
                         </div>
+                        <StatusChip username={e.u} mark={m} />
+                        <TagMenu entry={e} />
                         <Tooltip label={reviewed ? t.list.unreview : t.list.review}>
                           <button
                             type="button"
@@ -217,14 +248,15 @@ export function ListView({ list }: { list: ListKey }) {
                             <Icon name="check" size={14} />
                           </button>
                         </Tooltip>
-                        <Button
-                          variant="ghost"
-                          icon="external"
-                          disabled={gone}
-                          onClick={() => openExternal(profileUrl(e.u))}
-                        >
-                          {t.list.open}
-                        </Button>
+                        {broken ? (
+                          <Button variant="ghost" icon="alert" className="row-open" onClick={() => explainUnavailable(e)}>
+                            {t.tags.unavailable}
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" icon="external" className="row-open" onClick={() => openProfile(e.u)}>
+                            {t.list.open}
+                          </Button>
+                        )}
                       </motion.li>
                     )
                   })}

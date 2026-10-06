@@ -5,7 +5,7 @@ import { SPRING } from '../lib/motion'
 import { Icon, type IconName } from './Icon'
 
 export type MenuEntry =
-  | { kind?: 'item'; icon?: IconName; label: string; hint?: string; danger?: boolean; disabled?: boolean; checked?: boolean; onSelect?: () => void }
+  | { kind?: 'item'; icon?: IconName; dot?: string; label: string; hint?: string; danger?: boolean; disabled?: boolean; checked?: boolean; onSelect?: () => void }
   | { kind: 'divider' }
 
 interface Props {
@@ -52,11 +52,15 @@ export function Menu({ entries, trigger }: Props) {
         select(active)
       }
     }
+    // The menu is positioned once, so scrolling anything closes it instead of leaving it behind.
+    const onScroll = (ev: Event) => !list.current?.contains(ev.target as Node) && setOpen(false)
     window.addEventListener('pointerdown', onDown)
     window.addEventListener('keydown', onKey)
+    window.addEventListener('scroll', onScroll, true)
     return () => {
       window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('keydown', onKey)
+      window.removeEventListener('scroll', onScroll, true)
     }
   })
 
@@ -108,6 +112,7 @@ export function Menu({ entries, trigger }: Props) {
                     onClick={() => select(i)}
                   >
                     {e.icon && <Icon name={e.icon} size={15} />}
+                    {e.dot && <span className="menu-dot" style={{ background: e.dot }} />}
                     <span>{e.label}</span>
                     {e.hint && <span className="menu-hint">{e.hint}</span>}
                     {e.checked && <Icon name="check" size={15} className="menu-check" />}

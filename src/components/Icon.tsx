@@ -23,6 +23,15 @@ const PATHS = {
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   sort: <path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3" />,
   grid: <><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></>,
+  reload: <path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6" />,
+  close: <path d="M6 6l12 12M18 6L6 18" />,
+  logout: <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11" />,
+  tag: <><path d="M3 12V4h8l10 10-8 8z" /><circle cx="7.5" cy="8.5" r="1.3" /></>,
+  undo: <path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3" />,
+  heart: <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />,
+  skip: <path d="M12 19V5M6 11l6-6 6 6" />,
+  queue: <path d="M4 6h16M4 12h10M4 18h7M17 15l3 3-3 3" />,
+  alert: <><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5h.01" /></>,
 } as const
 
 export type IconName = keyof typeof PATHS

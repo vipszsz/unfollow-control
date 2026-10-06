@@ -6,6 +6,7 @@ interface UcBridge {
   minimize(): void
   toggleMaximize(): void
   close(): void
+  instagramLogout(): Promise<void>
   onMaximized(cb: (maximized: boolean) => void): () => void
 }
 

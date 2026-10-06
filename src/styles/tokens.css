@@ -16,6 +16,7 @@
   --line-2: rgba(255, 255, 255, 0.14);
   --edge: rgba(255, 255, 255, 0.07); /* bright top edge: light catching the material */
   --popover: rgba(16, 18, 24, 0.82);
+  --card-solid: #11131a;
 
   --accent: #4a63ff;
   --accent-2: #6f84ff;
@@ -52,6 +53,7 @@
   --line-2: rgba(20, 22, 28, 0.14);
   --edge: rgba(255, 255, 255, 0.9);
   --popover: rgba(250, 251, 253, 0.86);
+  --card-solid: #f7f8fb;
 
   --green: #059669;
   --yellow: #a16207;

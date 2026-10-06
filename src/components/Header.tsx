@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { queueOf } from '../data/marks'
 import { useData } from '../data/store'
 import { useI18n, type Lang } from '../i18n'
 import { SPRING } from '../lib/motion'
@@ -21,11 +22,12 @@ const TABS = ['notFollowingBack', 'mutuals', 'fans', 'pending'] as const
 
 export function Header({ theme, onTheme }: Props) {
   const { t, lang, setLang } = useI18n()
-  const { status, lists, snapshots, importing, importFile } = useData()
+  const { status, lists, snapshots, importing, importFile, current, marks } = useData()
   const { openGuide, openWipe, view, setView, query, setQuery } = useUI()
   const search = useRef<HTMLInputElement>(null)
   const ready = status === 'ready'
   const num = new Intl.NumberFormat(lang === 'pt' ? 'pt-BR' : 'en')
+  const queued = useMemo(() => (current ? queueOf(current.following, marks).length : 0), [current, marks])
 
   // "/" jumps to the search field from anywhere.
   useEffect(() => {
@@ -38,12 +40,12 @@ export function Header({ theme, onTheme }: Props) {
     return () => window.removeEventListener('keydown', onKey)
   }, [ready])
 
-  const pill = (key: View, label: string, count?: number) => {
+  const pill = (key: View, label: string, count?: number, tone?: 'red') => {
     const on = ready && view === key
     const btn = (
       <button
         type="button"
-        className={`pill ${on ? 'is-on' : ''}`}
+        className={`pill ${on ? 'is-on' : ''} ${tone ? `pill-${tone}` : ''}`}
         aria-current={on ? 'page' : undefined}
         aria-disabled={!ready || undefined}
         onClick={() => ready && setView(key)}
@@ -93,6 +95,7 @@ export function Header({ theme, onTheme }: Props) {
         <nav className="pills" aria-label={t.list.overview}>
           {pill('overview', t.list.overview)}
           {TABS.map((k) => pill(k, t.nav[k], lists?.[k].length))}
+          {ready && (queued > 0 || view === 'queue') && pill('queue', t.queue.title, queued, 'red')}
         </nav>
 
         <div className="header-actions">
@@ -147,8 +150,14 @@ export function Header({ theme, onTheme }: Props) {
               { value: 'en', label: 'English', content: 'EN' },
             ]}
           />
-          <Tooltip label={ready ? t.comingSoon : t.locked}>
-            <Button variant="ghost" icon="cards" aria-disabled="true">
+          <Tooltip label={ready ? '' : t.locked}>
+            <Button
+              variant={view === 'swipe' && ready ? 'primary' : 'ghost'}
+              icon="cards"
+              aria-disabled={!ready || undefined}
+              aria-pressed={view === 'swipe'}
+              onClick={() => ready && setView(view === 'swipe' ? 'notFollowingBack' : 'swipe')}
+            >
               {t.actions.swipe}
             </Button>
           </Tooltip>

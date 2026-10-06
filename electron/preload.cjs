@@ -1,4 +1,4 @@
-// The only bridge between the page and Electron: window controls and opening allowed links.
+// The only bridge between the page and Electron: window controls, allowed links, Instagram logout.
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('uc', {
@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('uc', {
   minimize: () => ipcRenderer.send('win:minimize'),
   toggleMaximize: () => ipcRenderer.send('win:toggle-maximize'),
   close: () => ipcRenderer.send('win:close'),
+  instagramLogout: () => ipcRenderer.invoke('ig:logout'),
   onMaximized: (cb) => {
     const handler = (_e, value) => cb(value)
     ipcRenderer.on('win:maximized', handler)

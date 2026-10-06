@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { analyze, newest, type Lists } from './analyze'
 import { db, type Mark } from './db'
+import { isEmptyMark, type MarkPatch } from './marks'
 import { ImportError, parseExport, type Snapshot } from './parse'
 
 type Status = 'loading' | 'empty' | 'ready'
@@ -17,6 +18,10 @@ interface Data {
   /** Marks for the current owner, keyed by username. */
   marks: Map<string, Mark>
   toggleReviewed(username: string): void
+  /** Merge a change into an account's mark. Returns the previous mark, for undo. */
+  updateMark(username: string, patch: MarkPatch): Mark | undefined
+  /** Put back exactly what updateMark returned. */
+  restoreMark(username: string, previous: Mark | undefined): void
   importFile(file: File): Promise<void>
   clearError(): void
   wipe(): Promise<void>
@@ -69,23 +74,42 @@ export function DataProvider({ children }: { children: ReactNode }) {
     return out
   }, [allMarks, owner])
 
+  // Latest marks for synchronous reads in updateMark (state may lag a render behind).
+  const marksRef = useRef(allMarks)
+  marksRef.current = allMarks
+
+  const write = useCallback((key: string, next: Mark | undefined) => {
+    const map = new Map(marksRef.current)
+    if (next && !isEmptyMark(next)) {
+      map.set(key, next)
+      db.putMark(next)
+    } else {
+      map.delete(key)
+      db.deleteMark(key)
+    }
+    marksRef.current = map
+    setAllMarks(map)
+  }, [])
+
+  const updateMark = useCallback(
+    (u: string, patch: MarkPatch) => {
+      const key = `${owner}|${u}`
+      const prev = marksRef.current.get(key)
+      const next: Mark = { ...prev, ...patch, key }
+      if ('tag' in patch) next.decidedAt = patch.tag ? Date.now() : undefined
+      write(key, next)
+      return prev
+    },
+    [owner, write],
+  )
+
+  const restoreMark = useCallback((u: string, previous: Mark | undefined) => write(`${owner}|${u}`, previous), [owner, write])
+
   const toggleReviewed = useCallback(
     (u: string) => {
-      const key = `${owner}|${u}`
-      setAllMarks((prev) => {
-        const next = new Map(prev)
-        const m: Mark = { ...prev.get(key), key, reviewed: !prev.get(key)?.reviewed }
-        if (m.reviewed) {
-          next.set(key, m)
-          db.putMark(m)
-        } else {
-          next.delete(key)
-          db.deleteMark(key)
-        }
-        return next
-      })
+      updateMark(u, { reviewed: !marksRef.current.get(`${owner}|${u}`)?.reviewed })
     },
-    [owner],
+    [owner, updateMark],
   )
 
   const value = useMemo<Data>(() => {
@@ -99,11 +123,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       justImported,
       marks,
       toggleReviewed,
+      updateMark,
+      restoreMark,
       importFile,
       clearError: () => setError(undefined),
       wipe,
     }
-  }, [snapshots, current, importing, error, justImported, marks, toggleReviewed, importFile, wipe])
+  }, [snapshots, current, importing, error, justImported, marks, toggleReviewed, updateMark, restoreMark, importFile, wipe])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
