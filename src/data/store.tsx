@@ -48,7 +48,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setJustImported(false)
     try {
       const snap = await parseExport(file)
-      await db.put(snap)
+      // Some browsers block storage for local files; the import still works for this session.
+      await db.put(snap).catch(() => {})
       setSnapshots((prev) => [...(prev ?? []).filter((s) => s.id !== snap.id), snap])
       setJustImported(true)
     } catch (e) {
@@ -59,12 +60,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const deleteSnapshot = useCallback(async (id: string) => {
-    await db.deleteSnapshot(id)
+    await db.deleteSnapshot(id).catch(() => {})
     setSnapshots((prev) => (prev ?? []).filter((s) => s.id !== id))
   }, [])
 
   const wipe = useCallback(async () => {
-    await db.clear()
+    await db.clear().catch(() => {})
     setSnapshots([])
     setAllMarks(new Map())
     setJustImported(false)
@@ -88,10 +89,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const map = new Map(marksRef.current)
     if (next && !isEmptyMark(next)) {
       map.set(key, next)
-      db.putMark(next)
+      db.putMark(next).catch(() => {})
     } else {
       map.delete(key)
-      db.deleteMark(key)
+      db.deleteMark(key).catch(() => {})
     }
     marksRef.current = map
     setAllMarks(map)

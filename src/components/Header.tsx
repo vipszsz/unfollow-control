@@ -5,6 +5,7 @@ import { useData } from '../data/store'
 import { useI18n, type Lang } from '../i18n'
 import { SPRING } from '../lib/motion'
 import { pickZip } from '../lib/pickFile'
+import { openExternal } from '../lib/prefs'
 import type { Theme } from '../lib/theme'
 import { hasPanel, useUI, type View } from '../lib/ui'
 import { Button } from './Button'
@@ -20,6 +21,7 @@ interface Props {
 }
 
 const TABS = ['notFollowingBack', 'mutuals', 'fans', 'pending'] as const
+const REPO_URL = 'https://github.com/vipszsz/unfollow-control'
 
 export function Header({ theme, onTheme }: Props) {
   const { t, lang, setLang } = useI18n()
@@ -97,7 +99,7 @@ export function Header({ theme, onTheme }: Props) {
           <Menu
             entries={[
               { icon: 'help', label: t.menu.howTo, onSelect: openGuide },
-              { icon: 'code', label: t.menu.github, hint: t.soon, disabled: true },
+              { icon: 'code', label: t.menu.github, onSelect: () => openExternal(REPO_URL) },
               { kind: 'divider' },
               snapshots.length
                 ? { icon: 'trash', label: t.menu.wipe, danger: true, onSelect: openWipe }

@@ -51,6 +51,7 @@ function createWindow() {
     backgroundColor: '#06070a',
     show: false,
     title: 'Unfollow Control',
+    icon: path.join(__dirname, '..', DEV_URL ? 'public' : 'dist', 'icon-256.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
