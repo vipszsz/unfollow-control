@@ -1,0 +1,75 @@
+/* Design tokens. Dark is the default; light overrides below. */
+:root {
+  --font-text: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro', 'Helvetica Neue', Helvetica, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro', 'Helvetica Neue', Helvetica, sans-serif;
+
+  --bg: #06070a;
+  --fg: #eceef3;
+  --fg-2: #b9bdc8;
+  --mut: #8b90a0;
+  --faint: #5b6070;
+
+  --glass: rgba(255, 255, 255, 0.035);
+  --glass-2: rgba(255, 255, 255, 0.065);
+  --glass-3: rgba(255, 255, 255, 0.1);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --edge: rgba(255, 255, 255, 0.07); /* bright top edge: light catching the material */
+  --popover: rgba(16, 18, 24, 0.82);
+
+  --accent: #4a63ff;
+  --accent-2: #6f84ff;
+  --accent-fg: #ffffff;
+  --green: #34d399;
+  --yellow: #fde047;
+  --amber: #f59e0b;
+  --red: #fb7185;
+
+  --shadow-sm: 0 6px 18px -8px rgba(0, 0, 0, 0.55);
+  --shadow: 0 30px 80px -24px rgba(0, 0, 0, 0.65);
+  --sky: radial-gradient(120% 70% at 50% 118%, #a9a8c4 0%, #5b78b8 26%, #1d3f8f 50%, transparent 78%);
+  --grain-opacity: 0.09;
+
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 16px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #eef0f5;
+  --fg: #14161c;
+  --fg-2: #3a3f4b;
+  --mut: #5d6373;
+  --faint: #8f95a3;
+
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-2: rgba(255, 255, 255, 0.78);
+  --glass-3: rgba(255, 255, 255, 0.95);
+  --line: rgba(20, 22, 28, 0.08);
+  --line-2: rgba(20, 22, 28, 0.14);
+  --edge: rgba(255, 255, 255, 0.9);
+  --popover: rgba(250, 251, 253, 0.86);
+
+  --green: #059669;
+  --yellow: #a16207;
+  --amber: #b45309;
+  --red: #e11d48;
+
+  --shadow-sm: 0 6px 18px -10px rgba(40, 50, 90, 0.35);
+  --shadow: 0 30px 70px -30px rgba(40, 50, 90, 0.35);
+  --sky: radial-gradient(120% 70% at 50% 118%, #ffffff 0%, #c9d6f5 28%, #9db3ea 50%, transparent 80%);
+  --grain-opacity: 0.06;
+
+  color-scheme: light;
+}
+
+/* Gradient tints for panels (grainy mesh, after feralui.dev/gradients). */
+.tint-blue { --tint: radial-gradient(90% 80% at 0% 0%, rgba(74, 99, 255, 0.35), transparent 60%), radial-gradient(70% 60% at 100% 100%, rgba(120, 80, 255, 0.18), transparent 70%); }
+.tint-teal { --tint: radial-gradient(90% 80% at 100% 0%, rgba(45, 212, 191, 0.25), transparent 60%), radial-gradient(60% 60% at 0% 100%, rgba(74, 99, 255, 0.18), transparent 70%); }
+.tint-violet { --tint: radial-gradient(90% 80% at 0% 100%, rgba(168, 85, 247, 0.28), transparent 60%), radial-gradient(60% 60% at 100% 0%, rgba(236, 72, 153, 0.15), transparent 70%); }
+.tint-amber { --tint: radial-gradient(90% 80% at 100% 100%, rgba(245, 158, 11, 0.25), transparent 60%), radial-gradient(60% 60% at 0% 0%, rgba(244, 63, 94, 0.14), transparent 70%); }
+.tint-green { --tint: radial-gradient(90% 80% at 0% 0%, rgba(52, 211, 153, 0.24), transparent 60%), radial-gradient(60% 60% at 100% 100%, rgba(59, 130, 246, 0.18), transparent 70%); }
+.tint-sky { --tint: radial-gradient(100% 80% at 50% 120%, rgba(147, 197, 253, 0.35), transparent 65%); }
